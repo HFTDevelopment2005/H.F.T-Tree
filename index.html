@@ -207,7 +207,7 @@ h1 {
   100% { filter: drop-shadow(0 0 30px gold); }
 }
 
-/* الهدايا الأصلية - متجاوبة */
+/* الهدايا الأصلية - متجاوبة مع تعديل طفيف */
 .gifts-container {
   position: absolute;
   top: 0;
@@ -271,6 +271,10 @@ h1 {
   border: 1px solid rgba(255, 215, 0, 0.1);
   max-height: 600px;
   overflow-y: auto;
+  /* منع اختيار النص تجنباً للخلفية البيضاء */
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .tasks-title {
   font-size: clamp(1.5rem, 4.5vw, 2rem);
@@ -286,6 +290,9 @@ h1 {
   transition: all 0.3s ease;
   border-right: 4px solid transparent;
   cursor: pointer;
+  /* إصلاح مشكلة الخلفية البيضاء */
+  -webkit-tap-highlight-color: rgba(10, 40, 30, 0.7);
+  outline: none;
 }
 .task:hover {
   background: rgba(255, 255, 255, 0.15);
@@ -385,6 +392,8 @@ h1 {
   font-weight: bold;
   width: 90%;
   max-width: 250px;
+  /* إصلاح مشكلة الخلفية البيضاء */
+  -webkit-tap-highlight-color: rgba(76, 175, 80, 0.5);
 }
 .complete-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #3d8b40, #1B5E20);
@@ -431,6 +440,8 @@ h1 {
   font-weight: bold;
   width: 90%;
   max-width: 250px;
+  /* إصلاح مشكلة الخلفية البيضاء */
+  -webkit-tap-highlight-color: rgba(255, 87, 34, 0.5);
 }
 .reset-btn:hover {
   background: linear-gradient(135deg, #E64A19, #BF360C);
@@ -549,6 +560,15 @@ footer {
     width: 3px;
     height: 3px;
   }
+}
+
+/* إضافة قاعدة لتصحيح مشكلة التحديد على الأجهزة المحمولة */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+:focus {
+  outline: none;
 }
 </style>
 </head>
@@ -721,7 +741,6 @@ function createTreeLights() {
   if (!tri1 || !tri2 || !tri3) return;
 
   const triangles = [tri1, tri2, tri3];
-  // تقليل عدد الأضواء للشاشات الصغيرة
   const lightsPerTriangle = window.innerWidth < 480 ? [25, 20, 15] : [45, 35, 25];
 
   for (let t = 0; t < triangles.length; t++) {
@@ -774,7 +793,7 @@ function saveUserData() {
 
 function loadTreeAndTasks() {
   giftsContainer.innerHTML = '';
-  // نفس مواضع الهدايا الأصلية
+  // نفس مواضع الهدايا الأصلية كما في الكود الأصلي
   const giftPositions = [
     { top: '84%', left: '16%' },
     { top: '84%', left: '28%' },
@@ -823,11 +842,17 @@ function loadTreeAndTasks() {
     gift.appendChild(giftSymbol);
 
     gift.addEventListener('click', () => openGift(i));
+    gift.addEventListener('touchstart', function(e) {
+      e.preventDefault(); // منع السلوك الافتراضي على اللمس
+      this.style.webkitTapHighlightColor = 'transparent';
+    }, {passive: false});
+    
     giftsContainer.appendChild(gift);
   }
 
   tasksList.innerHTML = '';
   let hasCompletedTasks = false;
+  
   for (let i = 0; i < TOTAL_TASKS; i++) {
     if (userData.completedTasks[i]) {
       hasCompletedTasks = true;
@@ -842,13 +867,22 @@ function loadTreeAndTasks() {
         </div>
         <div class="task-description">${task.description}</div>
       `;
+      
       taskElement.addEventListener('click', () => openTaskModal(i));
+      // إصلاح مشكلة التحديد على الأجهزة المحمولة
+      taskElement.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        this.style.webkitTapHighlightColor = 'rgba(10, 40, 30, 0.7)';
+      }, {passive: false});
+      
       tasksList.appendChild(taskElement);
     }
   }
+  
   if (!hasCompletedTasks) {
     tasksList.innerHTML = '<p style="color: #c9f0dd; font-style: italic; padding: 20px; text-align: center;">اتلحلح يا بيه و خلص التاسكات 👺</p>';
   }
+  
   updateStats();
 }
 
